@@ -1,0 +1,9 @@
+<h1>科目リスト</h1>
+
+<table>
+<% @courses.each do |course| %>
+<tr>
+<td><%=h course.name %></td><td><%= link_to('講義リスト', course_lectures_path(:course_id => course.id)) %></td>
+</tr>
+<% end %>
+</table>

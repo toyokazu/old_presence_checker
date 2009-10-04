@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  moodle_id: 1
+  name: MyString
+  deleted_at: 2009-10-04 20:51:57
+
+two:
+  moodle_id: 1
+  name: MyString
+  deleted_at: 2009-10-04 20:51:57

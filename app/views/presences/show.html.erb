@@ -1,0 +1,15 @@
+<h1>出席者 <%=h @presence.login %></h1>
+
+<table>
+<tr>
+<td>ID</td><td><%=h @presence.login %></td>
+</tr>
+<tr>
+<td>時刻</td><td><%=h @presence.created_at.localtime %></td>
+</tr>
+<tr>
+<td>友人のPCで登録</td><td><%=h @presence.proxyed ? 'はい' : 'いいえ' %></td>
+</tr>
+</table>
+
+<%= link_to('科目リストに戻る', courses_path) %>

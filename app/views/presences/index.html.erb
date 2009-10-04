@@ -1,0 +1,18 @@
+<% if @lecture.nil? %>
+<h1>すべての講義の出席者</h1>
+<% else %>
+<h1><%=h @lecture.description %> の講義の出席者</h1>
+<% end %>
+
+<table>
+<tr>
+<th>ID</th><th>時刻</th><th>友人のPCで登録</th>
+</tr>
+<% @presences.each do |presence| %>
+<tr>
+<td><%=h presence.login %></td><td><%=h presence.created_at.localtime %></td><td><%=h presence.proxyed ? 'はい' : 'いいえ' %></td>
+</tr>
+<% end %>
+</table>
+
+<%= link_to('科目リストに戻る', courses_path) %>
