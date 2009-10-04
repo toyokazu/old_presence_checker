@@ -2,7 +2,7 @@ namespace :init do
   desc 'init test data'
   task :test_data => :environment do
     begin
-      course = Course.create(:moodle_id => 711, :name => 'Computer Network II')
+      course = Course.create(:moodle_id => 711, :name => 'コンピュータネットワークII')
       lecture = Lecture.create(:course => course, :description => '2009-10-05', :start_time => 1.hour.ago.localtime, :end_time => 1.hour.since.localtime)
       #lecture = Lecture.create(:course => course, :description => '2009-10-05', :start_time => Time.local(2009, 10, 5, 15, 0), :end_time => Time.local(2009, 10, 5, 16, 30))
 
