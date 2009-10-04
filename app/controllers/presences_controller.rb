@@ -28,7 +28,7 @@ class PresencesController < ApplicationController
     case RAILS_ENV
     when "production"
       # assume that the rails server resides backend of the load balancer
-      remote_addr = request.env['X_FORWARDED_FOR']
+      remote_addr = request.env['HTTP_X_FORWARDED_FOR']
     when "development", "test"
       remote_addr = request.env['REMOTE_ADDR']
     end
