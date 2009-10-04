@@ -24,7 +24,15 @@ class PresencesController < ApplicationController
   end
 
   def new
-    @presence = init_presence(Presence.new(:ip_addr => request.env['REMOTE_ADDR'],
+    remote_addr = nil
+    case RAILS_ENV
+    when "production"
+      # assume that the rails server resides backend of the load balancer
+      remote_addr = request.env['X_FORWARDED_FOR']
+    when "development", "test"
+      remote_addr = request.env['REMOTE_ADDR']
+    end
+    @presence = init_presence(Presence.new(:ip_addr => remote_addr,
 	:login => params[:login],
 	:name => params[:name],
 	:mail => params[:mail]))

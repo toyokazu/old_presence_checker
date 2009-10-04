@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20091004145637) do
+ActiveRecord::Schema.define(:version => 20091004121529) do
 
   create_table "courses", :force => true do |t|
     t.integer  "moodle_id"
@@ -43,11 +43,5 @@ ActiveRecord::Schema.define(:version => 20091004145637) do
   end
 
   add_index "presences", ["login", "lecture_id"], :name => "index_presences_on_login_and_lecture_id", :unique => true
-
-  create_table "test_resources", :force => true do |t|
-    t.string   "hoge"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
 
 end
