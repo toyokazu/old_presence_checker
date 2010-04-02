@@ -1,12 +1,18 @@
 require 'ipaddr'
 class PresencesController < ApplicationController
+  before_filter CASClient::Frameworks::Rails::Filter
+
   def index
     if !params[:lecture_id].nil?
       @lecture = Lecture.find(params[:lecture_id])
     else
       @lecture = Lecture.first(:conditions => ['description = ?', params[:lect]])
     end
-    @presences = Presence.with_lecture_id(params[:lecture_id]).with_lecture_description(params[:lect]).all
+    if admin_user?
+      @presences = Presence.with_course_id(params[:course_id]).with_lecture_id(params[:lecture_id]).with_lecture_description(params[:lect]).all
+    else
+      @presences = Presence.with_course_id(params[:course_id]).with_lecture_id(params[:lecture_id]).with_lecture_description(params[:lect]).all(:conditions => {:login => current_user})
+    end
 
     respond_to do |format|
       format.html # index.html.erb
@@ -23,6 +29,22 @@ class PresencesController < ApplicationController
     end
   end
 
+  # If you want to use this system together with Moodle,
+  # you have to create Web link to /presences/new in your Moodle course.
+  # And you also have to specify extended parameters as follows:
+  #
+  #  login = User - User Name
+  #  name = User - Sir & Given Name
+  #  mail = User - Mail Address
+  #  moodle_course_id = Course - id
+  #
+  # Assumed new window size (width, height) = (800, 600) for default css (precense_checker.css).
+  #  
+  # You can also register presence without Moodle.
+  # This function is basiclly for the students unregistered to the Moodle.
+  #
+  # GET /presences/new
+  # GET /courses/1/presences/new
   def new
     remote_addr = nil
     case RAILS_ENV
@@ -33,9 +55,9 @@ class PresencesController < ApplicationController
       remote_addr = request.env['REMOTE_ADDR']
     end
     @presence = init_presence(Presence.new(:ip_addr => remote_addr,
-	:login => params[:login],
-	:name => params[:name],
-	:mail => params[:mail]))
+                                           :login => params[:login],
+                                           :name => params[:name],
+                                           :mail => params[:mail]))
     if @presence.nil?
       return false
     end
@@ -75,13 +97,26 @@ class PresencesController < ApplicationController
       render :text => 'Error: 指定された条件で実行してください．'
       return nil
     end
+    # presence registration from Moodle
     if !params[:moodle_course_id].nil?
       # find Course related to the moodle course id
       presence.course = Course.first(:conditions => ['moodle_id = ?', params[:moodle_course_id]])
-    end
-    if presence.course.nil?
-      render :text => 'Error: 有効な Moodle の Course ID が指定されていません．'
-      return nil
+      if presence.course.nil?
+        render :text => 'Error: 有効な Moodle の Course ID が指定されていません．'
+        return nil
+      end
+      if action_name == 'create' && presence.login != current_user
+        render :text => 'Error: Moodle と同じユーザでログインしてください．'
+        return nil
+      end
+    else # local presence registration (for students unregistered to Moodle)
+      if !params[:course_id].nil? 
+        presence.course = Course.find(params[:course_id])
+      else
+        render :text => 'Error: 科目を選択してから出席登録してください．'
+        return nil
+      end
+      presence.login = current_user
     end
     # find ongoing Lecture
     presence.lecture = Lecture.with_course_id(presence.course.id).ongoing(Time.now).first

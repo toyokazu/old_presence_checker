@@ -7,4 +7,24 @@ class ApplicationController < ActionController::Base
 
   # Scrub sensitive parameters from your log
   # filter_parameter_logging :password
+  
+  def current_user
+    @current_user ||= session[:cas_user]
+  end
+
+  # change the condition for your environment
+  def admin_user?
+    current_user == 'akiyama'
+  end
+
+  def redirect_back_or_default
+    redirect_to(request.referer || course_path)
+  end
+
+  def check_admin
+    if !admin_user?
+      flash[:notice] = "This page requires admin role."
+      redirect_back_or_default and return
+    end
+  end
 end

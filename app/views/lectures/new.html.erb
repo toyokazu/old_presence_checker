@@ -1,0 +1,12 @@
+<h1>新規講義作成</h1>
+
+<% form_for(@lecture) do |f| %>
+  <%= f.error_messages %>
+
+  <%= render :partial => f %>
+  <p>
+    <%= f.submit '作成' %>
+  </p>
+<% end %>
+
+<%= link_to '戻る', (@lecture.course_id.nil?) ? lectures_path : course_lectures_path(@lecture.course_id) %>

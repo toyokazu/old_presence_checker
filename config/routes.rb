@@ -11,7 +11,7 @@ ActionController::Routing::Routes.draw do |map|
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   #   map.resources :products
-  map.resources :courses, :has_many => [ :lectures ]
+  map.resources :courses, :has_many => [ :lectures, :presences ]
   map.resources :lectures, :has_many => [ :presences ]
   map.resources :presences
 
@@ -35,6 +35,7 @@ ActionController::Routing::Routes.draw do |map|
 
   # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
   # map.root :controller => "welcome"
+  map.root :controller => "root"
 
   # See how all your routes lay out with "rake routes"
 

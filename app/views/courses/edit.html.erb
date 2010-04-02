@@ -1,0 +1,13 @@
+<h1>科目の編集</h1>
+
+<% form_for(@course) do |f| %>
+  <%= f.error_messages %>
+
+  <%= render :partial => f %>
+  <p>
+    <%= f.submit '更新' %>
+  </p>
+<% end %>
+
+<%= link_to '詳細', @course %> |
+<%= link_to '戻る', courses_path %>
