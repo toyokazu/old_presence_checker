@@ -46,16 +46,7 @@ class PresencesController < ApplicationController
   # GET /presences/new
   # GET /courses/1/presences/new
   def new
-    remote_addr = nil
-    case RAILS_ENV
-    when "production"
-      # assume that the rails server resides backend of the load balancer
-      remote_addr = request.env['HTTP_X_FORWARDED_FOR']
-    when "development", "test"
-      remote_addr = request.env['REMOTE_ADDR']
-    end
-    @presence = init_presence(Presence.new(:ip_addr => remote_addr,
-                                           :login => params[:login],
+    @presence = init_presence(Presence.new(:login => params[:login],
                                            :name => params[:name],
                                            :mail => params[:mail]))
     if @presence.nil?
@@ -93,30 +84,39 @@ class PresencesController < ApplicationController
 
   private
   def init_presence(presence)
-    if !ip_addr_check(IPAddr.new(presence.ip_addr))
+    remote_addr = remote_address
+    if !ip_addr_check(IPAddr.new(remote_addr))
       render :text => 'Error: 指定された条件で実行してください．'
       return nil
     end
-    # presence registration from Moodle
-    if !params[:moodle_course_id].nil?
+    presence.ip_addr = remote_addr
+    # presence registration from Moodle (new action)
+    if action_name == 'new' && !params[:moodle_course_id].nil?
       # find Course related to the moodle course id
       presence.course = Course.first(:conditions => ['moodle_id = ?', params[:moodle_course_id]])
       if presence.course.nil?
         render :text => 'Error: 有効な Moodle の Course ID が指定されていません．'
         return nil
       end
-      if action_name == 'create' && presence.login != current_user
-        render :text => 'Error: Moodle と同じユーザでログインしてください．'
-        return nil
-      end
-    else # local presence registration (for students unregistered to Moodle)
-      if !params[:course_id].nil? 
-        presence.course = Course.find(params[:course_id])
+    else
+      # local presence registration (for students unregistered to Moodle, new action)
+      # or create action
+      if action_name == 'new'
+        # new action
+        if !params[:course_id].nil?
+          presence.course = Course.find(params[:course_id])
+        else
+          render :text => 'Error: 科目を選択してから出席登録してください．'
+          return nil
+        end
+        presence.login = current_user
       else
-        render :text => 'Error: 科目を選択してから出席登録してください．'
-        return nil
+        # create action
+        if presence.login != current_user
+          render :text => 'Error: Moodle と同じユーザでログインしてください．'
+          return nil
+        end
       end
-      presence.login = current_user
     end
     # find ongoing Lecture
     presence.lecture = Lecture.with_course_id(presence.course.id).ongoing(Time.now).first
@@ -132,6 +132,18 @@ class PresencesController < ApplicationController
       presence.proxyed = false
     end
     presence
+  end
+
+  def remote_address
+    addr = nil
+    case RAILS_ENV
+    when "production"
+      # assume that the rails server resides backend of the load balancer
+      addr = request.env['HTTP_X_FORWARDED_FOR']
+    when "development", "test"
+      addr = request.env['REMOTE_ADDR']
+    end
+    addr
   end
 
   def ip_addr_check(remote_addr)

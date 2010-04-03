@@ -73,10 +73,11 @@ class LecturesController < ApplicationController
   # DELETE /lectures/1.xml
   def destroy
     @lecture = Lecture.find(params[:id])
+    @course = @lecture.course
     @lecture.destroy
 
     respond_to do |format|
-      format.html { redirect_to(lectures_url) }
+      format.html { redirect_to(course_lectures_url(@course)) }
       format.xml  { head :ok }
     end
   end
