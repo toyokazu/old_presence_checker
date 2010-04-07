@@ -1,243 +1,108 @@
-== Welcome to Rails
+== Presence Checker
 
-Rails is a web-application framework that includes everything needed to create 
-database-backed web applications according to the Model-View-Control pattern. 
-
-This pattern splits the view (also called the presentation) into "dumb" templates
-that are primarily responsible for inserting pre-built data in between HTML tags.
-The model contains the "smart" domain objects (such as Account, Product, Person,
-Post) that holds all the business logic and knows how to persist themselves to
-a database. The controller handles the incoming requests (such as Save New Account,
-Update Product, Show Post) by manipulating the model and directing data to the view.
-
-In Rails, the model is handled by what's called an object-relational mapping
-layer entitled Active Record. This layer allows you to present the data from
-database rows as objects and embellish these data objects with business logic
-methods. You can read more about Active Record in
-link:files/vendor/rails/activerecord/README.html.
-
-The controller and view are handled by the Action Pack, which handles both
-layers by its two parts: Action View and Action Controller. These two layers
-are bundled in a single package due to their heavy interdependence. This is
-unlike the relationship between the Active Record and Action Pack that is much
-more separate. Each of these packages can be used independently outside of
-Rails.  You can read more about Action Pack in
-link:files/vendor/rails/actionpack/README.html.
+Presence Cheker checks students presence by authenticating user using Single Sign On (SSO) and source IP address. It can be used with Moodle to omitting user information input (However if you do not federate Moodle with SSO, user must be authenticated twice by Moodle and SSO).
 
 
-== Getting Started
+== Installation
 
-1. At the command prompt, start a new Rails application using the <tt>rails</tt> command
-   and your application name. Ex: rails myapp
-2. Change directory into myapp and start the web server: <tt>script/server</tt> (run with --help for options)
-3. Go to http://localhost:3000/ and get "Welcome aboard: You're riding the Rails!"
-4. Follow the guidelines to start developing your application
+You can checkout latest version from github.com
 
+### clone latest commit
+% git clone git://github.com/toyokazu/presence_checker.git
+### change place to application directory
+% cd presence_checker
 
-== Web Servers
+This application requires the following Gems:
 
-By default, Rails will try to use Mongrel if it's are installed when started with script/server, otherwise Rails will use WEBrick, the webserver that ships with Ruby. But you can also use Rails
-with a variety of other web servers.
+rails >= 2.3.5 (rails, activesupport, activerecord, actionpack)
+rubycas-client >= 2.1.0
 
-Mongrel is a Ruby-based webserver with a C component (which requires compilation) that is
-suitable for development and deployment of Rails applications. If you have Ruby Gems installed,
-getting up and running with mongrel is as easy as: <tt>gem install mongrel</tt>.
-More info at: http://mongrel.rubyforge.org
+About installation of RubyGems, refer the URL below:
+http://docs.rubygems.org/read/chapter/3
 
-Say other Ruby web servers like Thin and Ebb or regular web servers like Apache or LiteSpeed or
-Lighttpd or IIS. The Ruby web servers are run through Rack and the latter can either be setup to use
-FCGI or proxy to a pack of Mongrels/Thin/Ebb servers.
+After installing RubyGems, you can install required gems by the command below:
 
-== Apache .htaccess example for FCGI/CGI
-
-# General Apache options
-AddHandler fastcgi-script .fcgi
-AddHandler cgi-script .cgi
-Options +FollowSymLinks +ExecCGI
-
-# If you don't want Rails to look in certain directories,
-# use the following rewrite rules so that Apache won't rewrite certain requests
-# 
-# Example:
-#   RewriteCond %{REQUEST_URI} ^/notrails.*
-#   RewriteRule .* - [L]
-
-# Redirect all requests not available on the filesystem to Rails
-# By default the cgi dispatcher is used which is very slow
-# 
-# For better performance replace the dispatcher with the fastcgi one
-#
-# Example:
-#   RewriteRule ^(.*)$ dispatch.fcgi [QSA,L]
-RewriteEngine On
-
-# If your Rails application is accessed via an Alias directive,
-# then you MUST also set the RewriteBase in this htaccess file.
-#
-# Example:
-#   Alias /myrailsapp /path/to/myrailsapp/public
-#   RewriteBase /myrailsapp
-
-RewriteRule ^$ index.html [QSA]
-RewriteRule ^([^.]+)$ $1.html [QSA]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ dispatch.cgi [QSA,L]
-
-# In case Rails experiences terminal errors
-# Instead of displaying this message you can supply a file here which will be rendered instead
-# 
-# Example:
-#   ErrorDocument 500 /500.html
-
-ErrorDocument 500 "<h2>Application error</h2>Rails application failed to start properly"
+% sudo gem install rails rubycas-client
 
 
-== Debugging Rails
+== DB configuration
 
-Sometimes your application goes wrong.  Fortunately there are a lot of tools that
-will help you debug it and get it back on the rails.
+If you use SQLite3 as a repository, just copy config/database.yml.sample to config/database.yml.
 
-First area to check is the application log files.  Have "tail -f" commands running
-on the server.log and development.log. Rails will automatically display debugging
-and runtime information to these files. Debugging info will also be shown in the
-browser on requests from 127.0.0.1.
+% cp config/database.yml.sample config/database.yml
 
-You can also log your own messages directly into the log file from your code using
-the Ruby logger class from inside your controllers. Example:
+Then initalize database,
 
-  class WeblogController < ActionController::Base
-    def destroy
-      @weblog = Weblog.find(params[:id])
-      @weblog.destroy
-      logger.info("#{Time.now} Destroyed Weblog ID ##{@weblog.id}!")
-    end
-  end
+% rake db:migrate
 
-The result will be a message in your log file along the lines of:
+You can create initial data by using db/seeds.rb script.
 
-  Mon Oct 08 14:22:29 +1000 2007 Destroyed Weblog ID #1
-
-More information on how to use the logger is at http://www.ruby-doc.org/core/
-
-Also, Ruby documentation can be found at http://www.ruby-lang.org/ including:
-
-* The Learning Ruby (Pickaxe) Book: http://www.ruby-doc.org/docs/ProgrammingRuby/
-* Learn to Program: http://pine.fm/LearnToProgram/  (a beginners guide)
-
-These two online (and free) books will bring you up to speed on the Ruby language
-and also on programming in general.
+### edit seeds.rb
+% vi db/seeds.rb
+### then apply seeds.rb
+% rake db:seed
 
 
-== Debugger
+== Starting server
 
-Debugger support is available through the debugger command when you start your Mongrel or
-Webrick server with --debugger. This means that you can break out of execution at any point
-in the code, investigate and change the model, AND then resume execution! 
-You need to install ruby-debug to run the server in debugging mode. With gems, use 'gem install ruby-debug'
-Example:
+For testing, just use WEBrick.
 
-  class WeblogController < ActionController::Base
-    def index
-      @posts = Post.find(:all)
-      debugger
-    end
-  end
+% script/server
 
-So the controller will accept the action, run the first line, then present you
-with a IRB prompt in the server window. Here you can do things like:
+and access http://localhost:3000/.
 
-  >> @posts.inspect
-  => "[#<Post:0x14a6be8 @attributes={\"title\"=>nil, \"body\"=>nil, \"id\"=>\"1\"}>,
-       #<Post:0x14a6620 @attributes={\"title\"=>\"Rails you know!\", \"body\"=>\"Only ten..\", \"id\"=>\"2\"}>]"
-  >> @posts.first.title = "hello from a debugger"
-  => "hello from a debugger"
+For production, thin may be good for now.
 
-...and even better is that you can examine how your runtime objects actually work:
+### install thin gem
+% sudo gem install thin
+### create thin config
+### in the following example, use 4 servers (port 4030-4033)
+### with application path /presence-checker
+### and use production environment
+% thin config --config config/thin.conf --servers 4 --prefix /presence-checker --daemonize --environment production --port 4030
+### initialize production db
+% rake db:migrate RAILS_ENV=production
+% rake db:seed RAILS_ENV=production
+### start up thin servers
+% thin start --config config/thin.conf
 
-  >> f = @posts.first
-  => #<Post:0x13630c4 @attributes={"title"=>nil, "body"=>nil, "id"=>"1"}>
-  >> f.
-  Display all 152 possibilities? (y or n)
+You can use Apache 2.2 as a reverse proxy to the thin servers.
 
-Finally, when you're ready to resume execution, you enter "cont"
+### example httpd.conf configuration
+% sudo vi /etc/apache2/httpd.conf
+...
+LoadModule proxy_balancer_module libexec/apache2/mod_proxy_balancer.so
+...
+ProxyPass /presence-checker balancer://presence-checker
+ProxyPassReverse /presence-checker balancer://presence-checker
+<Proxy "balancer://presence-checker">
+  BalancerMember http://localhost:4030/presence-checker loadfactor=1
+  BalancerMember http://localhost:4031/presence-checker loadfactor=1
+  BalancerMember http://localhost:4032/presence-checker loadfactor=1
+  BalancerMember http://localhost:4033/presence-checker loadfactor=1
+</Proxy>
 
 
-== Console
+== Collaborate with Moodle
 
-You can interact with the domain model by starting the console through <tt>script/console</tt>.
-Here you'll have all parts of the application configured, just like it is when the
-application is running. You can inspect domain models, change values, and save to the
-database. Starting the script without arguments will launch it in the development environment.
-Passing an argument will specify a different environment, like <tt>script/console production</tt>.
+1.  Create web link to URL https://pchecker-host/pchecker-path/presences/new
+    at Moodle course by setting "extended parameters" named as follows:
 
-To reload your controllers and models after launching the console run <tt>reload!</tt>
+    login = User - User Name
+    name = User - Sir & Given Name
+    mail = User - Mail Address
+    moodle_course_id = Course - id
 
-== dbconsole
+  Assumed new window size (width, height) = (800, 600) for default css (precense_checker.css).
 
-You can go to the command line of your database directly through <tt>script/dbconsole</tt>.
-You would be connected to the database with the credentials defined in database.yml.
-Starting the script without arguments will connect you to the development database. Passing an
-argument will connect you to a different database, like <tt>script/dbconsole production</tt>.
-Currently works for mysql, postgresql and sqlite.
+2.  Create course at Presence Checker
+    (access URL https://pchecker-host/pchecker-path/courses/new)
+    The new course should have the moodle_course_id of your course.
 
-== Description of Contents
 
-app
-  Holds all the code that's specific to this particular application.
+== Use without Moodle
 
-app/controllers
-  Holds controllers that should be named like weblogs_controller.rb for
-  automated URL mapping. All controllers should descend from ApplicationController
-  which itself descends from ActionController::Base.
+You can also register presence without Moodle.
+In this case, students must input their profiles manually.
+This function is basiclly for the students unregistered to the Moodle.
 
-app/models
-  Holds models that should be named like post.rb.
-  Most models will descend from ActiveRecord::Base.
-
-app/views
-  Holds the template files for the view that should be named like
-  weblogs/index.html.erb for the WeblogsController#index action. All views use eRuby
-  syntax.
-
-app/views/layouts
-  Holds the template files for layouts to be used with views. This models the common
-  header/footer method of wrapping views. In your views, define a layout using the
-  <tt>layout :default</tt> and create a file named default.html.erb. Inside default.html.erb,
-  call <% yield %> to render the view using this layout.
-
-app/helpers
-  Holds view helpers that should be named like weblogs_helper.rb. These are generated
-  for you automatically when using script/generate for controllers. Helpers can be used to
-  wrap functionality for your views into methods.
-
-config
-  Configuration files for the Rails environment, the routing map, the database, and other dependencies.
-
-db
-  Contains the database schema in schema.rb.  db/migrate contains all
-  the sequence of Migrations for your schema.
-
-doc
-  This directory is where your application documentation will be stored when generated
-  using <tt>rake doc:app</tt>
-
-lib
-  Application specific libraries. Basically, any kind of custom code that doesn't
-  belong under controllers, models, or helpers. This directory is in the load path.
-
-public
-  The directory available for the web server. Contains subdirectories for images, stylesheets,
-  and javascripts. Also contains the dispatchers and the default HTML files. This should be
-  set as the DOCUMENT_ROOT of your web server.
-
-script
-  Helper scripts for automation and generation.
-
-test
-  Unit and functional tests along with fixtures. When using the script/generate scripts, template
-  test files will be generated for you and placed in this directory.
-
-vendor
-  External libraries that the application depends on. Also includes the plugins subdirectory.
-  If the app has frozen rails, those gems also go here, under vendor/rails/.
-  This directory is in the load path.
