@@ -5,6 +5,11 @@ class LecturesController < ApplicationController
   def index
     @course_id = params[:course_id]
     @lectures = Lecture.with_course_id(@course_id).all
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @lectures }
+    end
   end
 
   # GET /lectures/1
