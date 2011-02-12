@@ -28,7 +28,7 @@ namespace :batch do
         fout.print NKF.nkf('-Ws', "出席回数 (DB 本人),出席回数 (DB 代理),出席回数 (紙)\n")
         csv_students.each do |student|
           ATTRS.each do |v|
-            fout.print NKF.nkf('-Ws', "#{student[attrs[v]]}, ")
+            fout.print "#{student[attrs[v]]}, "
           end
           fout.print NKF.nkf('-Ws', "#{db_students_own["g" + student[attrs["学生証番号"]]]},#{db_students_proxyed["g" + student[attrs["学生証番号"]]]},\r\n")
         end
